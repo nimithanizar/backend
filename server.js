@@ -56,38 +56,45 @@ console.log("audio string",audiofile);
 res.send(audiofile);
 });
 
+
+
+
 async function convertAudio(input) {
-  // The text to synthesize
-  const text = input;
- // Construct the request
+  try {
+    // The text to synthesize
+    const text = input;
+
+    // Construct the request
     const request = {
-      input: {text: text},
+      input: { text: text },
       // Select the language and SSML voice gender (optional)
-      voice: {languageCode: 'en-IN',name: 'en-IN-Wavenet-D', ssmlGender: 'FEMALE'},
+      voice: { languageCode: 'en-IN', name: 'en-IN-Wavenet-D', ssmlGender: 'FEMALE' },
       // select the type of audio encoding
-      audioConfig: {audioEncoding: 'MP3', speakingRate: 0.9},
+      audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9 },
     };
 
+    // Get the current date and time as a string
+    const now = new Date().toISOString().replace(/:/g, '_').replace(/\..+/, '');
 
-     // Get the current date and time as a string
-const now = new Date().toISOString().replace(/:/g, '_').replace(/\..+/, '');
+    // Set the output filename with the current date and time appended
+    const outputFilename = `output_${now}.mp3`;
 
-// Set the output filename with the current date and time appended
-const outputFilename = `output_${now}.mp3`;
+    // Performs the text-to-speech request
+    const [response] = await client.synthesizeSpeech(request);
 
+    // Write the binary audio content to a local file
+    const writeFile = util.promisify(fs.writeFile);
+    await writeFile(path.join(__dirname, `/public/${outputFilename}`), response.audioContent, 'binary');
+    console.log('Audio content written to file: output.mp3');
 
-  // Performs the text-to-speech request
-  const [response] = await client.synthesizeSpeech(request);
-  // Write the binary audio content to a local file
-  const writeFile = util.promisify(fs.writeFile);
-  await writeFile(path.join(__dirname, `/public/${outputFilename}`), response.audioContent, 'binary');
-   console.log('Audio content written to file: output.mp3');
-
-
-  
-// returning audio file in binary format
- return outputFilename;
+    // Return the generated audio filename
+    return outputFilename;
+  } catch (error) {
+    console.error('Error occurred during audio conversion:', error);
+    throw error; // Rethrow the error to be handled in the caller
+  }
 }
+
 app.listen(port, () => console.log(`Hello world app listening on port ${port}!`))
 
 

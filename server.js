@@ -12,6 +12,7 @@ const textToSpeech = require('@google-cloud/text-to-speech');
 
 const otpHelper = require('./otpHelper')
 
+
 // Import other required libraries
 
 
@@ -26,6 +27,10 @@ app.use(express.json());
 
 // use otpHelper file(ceate endpoint)
 app.use('/otp',otpHelper)
+
+app.get('/',async (req, res) => {
+  res.send('Ok Working')
+})
 
 app.use(express.static('public'));
 

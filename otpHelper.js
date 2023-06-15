@@ -27,6 +27,7 @@ router.get('/verify/:to', async (req, res) => {
   router.get('/check/:to/:code', async (req, res) => {
     const to = req.params.to
     const code = req.params.code
+    console.log("otp",code)
     client.verify
       .v2
       .services(verifySid)
@@ -36,6 +37,7 @@ router.get('/verify/:to', async (req, res) => {
       })
       .catch((err) => {
         res.json(err)
+        console.log("error in verification",err)
       })
   })
 

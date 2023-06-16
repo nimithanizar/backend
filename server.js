@@ -27,9 +27,9 @@ app.use(express.json());
 // use otpHelper file(ceate endpoint)
 app.use('/otp',otpHelper)
 
-app.get('/',async (req, res) => {
-  res.send('Ok Working')
-})
+// app.get('/',async (req, res) => {
+//   res.send('Ok Working')
+// })
 
 app.use(express.static('public'));
 

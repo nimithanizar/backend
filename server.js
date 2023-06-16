@@ -12,7 +12,6 @@ const textToSpeech = require('@google-cloud/text-to-speech');
 
 const otpHelper = require('./otpHelper')
 
-
 // Import other required libraries
 
 
@@ -28,9 +27,9 @@ app.use(express.json());
 // use otpHelper file(ceate endpoint)
 app.use('/otp',otpHelper)
 
-// app.get('/',async (req, res) => {
-//   res.send('Ok Working')
-// })
+app.get('/',async (req, res) => {
+  res.send('Ok Working')
+})
 
 app.use(express.static('public'));
 
@@ -45,56 +44,53 @@ const client = new textToSpeech.TextToSpeechClient();
 //});
 
 
-app.post('/converter',async (req, res) => {
- console.log(req.body);
-// console.log(req);
- 
-let audiofile = await convertAudio(req.body.text);
-console.log("audio string",audiofile);  
-
-// res.json({ outputFilename: outputFilename });
-res.send(audiofile);
+app.post('/converter', async (req, res) => {
+  try {
+    const audioFile = await convertAudio(req.body.text);
+    console.log("audio string", audioFile);
+    res.send(audioFile);
+  } catch (error) {
+    console.error('Error occurred during audio conversion:', error);
+    res.status(500).send('Error occurred during audio conversion');
+  }
 });
 
 
 
 
-async function convertAudio(input) {
-  try {
-    // The text to synthesize
-    const text = input;
 
-    // Construct the request
+async function convertAudio(input) {
+  // The text to synthesize
+  const text = input;
+ // Construct the request
     const request = {
-      input: { text: text },
+      input: {text: text},
       // Select the language and SSML voice gender (optional)
-      voice: { languageCode: 'en-IN', name: 'en-IN-Wavenet-D', ssmlGender: 'FEMALE' },
+      voice: {languageCode: 'en-IN',name: 'en-IN-Wavenet-D', ssmlGender: 'FEMALE'},
       // select the type of audio encoding
-      audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9 },
+      audioConfig: {audioEncoding: 'MP3', speakingRate: 0.9},
     };
 
-    // Get the current date and time as a string
-    const now = new Date().toISOString().replace(/:/g, '_').replace(/\..+/, '');
 
-    // Set the output filename with the current date and time appended
-    const outputFilename = `output_${now}.mp3`;
+     // Get the current date and time as a string
+const now = new Date().toISOString().replace(/:/g, '_').replace(/\..+/, '');
 
-    // Performs the text-to-speech request
-    const [response] = await client.synthesizeSpeech(request);
+// Set the output filename with the current date and time appended
+const outputFilename = `output_${now}.mp3`;
 
-    // Write the binary audio content to a local file
-    const writeFile = util.promisify(fs.writeFile);
-    await writeFile(path.join(__dirname, `/public/${outputFilename}`), response.audioContent, 'binary');
-    console.log('Audio content written to file: output.mp3');
 
-    // Return the generated audio filename
-    return outputFilename;
-  } catch (error) {
-    console.error('Error occurred during audio conversion:', error);
-    throw error; // Rethrow the error to be handled in the caller
-  }
+  // Performs the text-to-speech request
+  const [response] = await client.synthesizeSpeech(request);
+  // Write the binary audio content to a local file
+  const writeFile = util.promisify(fs.writeFile);
+  await writeFile(path.join(__dirname, `/public/${outputFilename}`), response.audioContent, 'binary');
+   console.log('Audio content written to file: output.mp3');
+
+
+  
+// returning audio file in binary format
+ return outputFilename;
 }
-
 app.listen(port, () => console.log(`Hello world app listening on port ${port}!`))
 
 
